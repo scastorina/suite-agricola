@@ -135,15 +135,23 @@
 
                 if (user) {
                     userId = user.uid;
-                    const userDoc = await getDoc(doc(db, "users", userId));
-                    userRole = userDoc.exists() ? userDoc.data().role : 'user';
-                    userAccessibleApps = userDoc.exists() ? userDoc.data().accessibleApps || [] : [];
-                    
-                    document.getElementById('user-email-display').textContent = user.email;
-                    authView.classList.add('hidden');
-                    appView.classList.remove('hidden');
-                    
-                    renderizarUI();
+                    try {
+                        const userDoc = await getDoc(doc(db, "users", userId));
+                        userRole = userDoc.exists() ? userDoc.data().role : 'user';
+                        userAccessibleApps = userDoc.exists() ? userDoc.data().accessibleApps || [] : [];
+                        
+                        document.getElementById('user-email-display').textContent = user.email;
+                        authView.classList.add('hidden');
+                        appView.classList.remove('hidden');
+                        
+                        renderizarUI();
+                    } catch (error) {
+                         if (error.code === 'permission-denied') {
+                            authView.classList.remove('hidden');
+                            appView.classList.add('hidden');
+                            manejarErrorDePermisos(error);
+                         }
+                    }
                 } else {
                     userId = null;
                     userRole = null;
